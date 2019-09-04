@@ -1,0 +1,30 @@
+org 0000h
+mov p0,#00h
+mov p1,#00h
+mov p2,#00h
+mov p3,#00h
+mov r0,#02h
+
+;p1.0-sig rec
+;p1.1- # dialing
+ 
+main:
+
+jnb p1.0,main
+jb p1.0,$
+djnz r0,main
+mov r0,#02h
+setb p1.1
+acall delay
+clr p1.1
+sjmp main
+
+delay:
+
+mov R7,#08h                    
+up4:mov R6,#050h
+up3:mov R5,#00h                ; DELAY FOR 1SEC DELAY
+djnz R5,$
+djnz R6,up3 
+djnz R7,up4
+ret

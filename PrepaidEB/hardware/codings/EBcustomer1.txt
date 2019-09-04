@@ -1,0 +1,399 @@
+org 0000h
+
+
+       lcd_dat  equ  p2
+       rs       bit  p3.5
+       rw       bit  p3.6
+       en       bit  p3.7
+       lcd_ack  bit  p2.7 
+
+
+
+
+main:
+mov p0,#00h
+mov p2,#00h
+
+clr p1.0
+mov p1,#00h
+mov p3,#00h
+clr p3.5
+clr p3.6
+clr p3.7
+
+
+
+mov     a,#3ch            ;8 bits/char ,2 rows ,5*10 dots/char
+acall   command           ;strobe command to display
+mov     a,#06h            ;shift cursor right
+acall   command           ;strobe command to display
+mov     a,#01h            ;clr memory and home cursor
+acall   command           ;strobe command to display
+mov     a,#80h            ;move cursor to space 0 ,line 1
+acall   command           ;strobe command to display  
+mov a,#0eh
+acall command
+
+jstart:
+mov r0,#50h
+
+hello:
+jnb p1.0,hello
+jb p1.0,$
+clr p1.0
+mov a,p0
+mov r1,a
+cjne a,#0bh,disp
+
+h5:
+jnb p1.0,h5    ;code
+jb p1.0,$
+clr p1.0
+mov a,p0
+mov @r0,a
+inc r0
+acall lcd
+cjne a,#0bh,h5
+
+mov a,#01h
+acall command
+acall delay
+acall delay
+acall delay
+mov r0,#50h
+
+send:
+mov a,@r0
+acall dialing
+acall lcd
+acall delay
+inc r0
+acall delay
+cjne a,#0bh,send
+
+
+hj:
+jnb p1.0,hj
+jb p1.0,$
+clr p1.0
+mov a,p0
+mov r1,a
+
+disp:
+
+mov a,#01h
+acall command
+mov a,#'R'
+acall display
+mov a,#'S'
+acall display
+mov a,r1
+acall lcd
+
+       ;**************DISPLAY FOR AMOUNT(RUPEES)************
+
+rupees:
+jnb p1.0,rupees
+jb p1.0,$
+clr p1.0
+mov a,p0
+cjne a,#0bh,store
+mov a,#'.'
+acall display
+sjmp paise1
+
+store:
+acall lcd
+ljmp rupees
+
+       ;*************DISPLAY FOR AMOUNT(PAISE)************
+
+paise1:
+jnb p1.0,paise1
+jb p1.0,$
+clr p1.0
+mov a,p0
+acall lcd
+
+paise2:
+jnb p1.0,paise2
+jb p1.0,$
+clr p1.0
+mov a,p0
+acall lcd
+mov a,#0c3h
+acall command
+
+status:
+jnb p1.0,status
+jb p1.0,$
+clr p1.0
+mov a,p0
+
+cjne a,#00h,no
+ljmp h1
+
+no:
+cjne a,#02h,low1
+clr p3.4
+mov a,#'O'
+acall display
+mov a,#'K'
+acall display
+ljmp h1
+
+low1:
+cjne a,#04h,zero
+mov a,#'L'
+acall display
+mov a,#'O'
+acall display
+mov a,#'W'
+acall display
+mov a,#' '
+acall display
+mov a,#'B'
+acall display
+mov a,#'A'
+acall display
+mov a,#'L'
+acall display
+mov a,#'A'
+acall display
+mov a,#'N'
+acall display
+mov a,#'C'
+acall display
+mov a,#'E'
+acall display
+setb p3.4
+ljmp h1
+
+zero:
+cjne a,#06h,h1              ;cut the supply
+clr p3.4
+mov a,#'S'
+acall display
+mov a,#'U'
+acall display
+mov a,#'P'
+acall display
+mov a,#'P'
+acall display
+mov a,#'L'
+acall display
+mov a,#'Y'
+acall display
+mov a,#' '
+acall display
+mov a,#'C'
+acall display
+mov a,#'U'
+acall display
+mov a,#'T'
+acall display
+
+h1:
+acall delay
+acall delay
+ljmp jstart
+
+
+
+
+
+
+lcd:
+
+for11:
+cjne a,#01h,for12
+mov a,#'1'
+acall display
+ret
+
+for12:
+cjne a,#02h,for13
+mov a,#'2'
+acall display
+ret
+
+for13:
+cjne a,#03h,for14
+mov a,#'3'
+acall display
+ret
+
+for14:
+cjne a,#04h,for15
+mov a,#'4'
+acall display
+ret
+
+for15:
+cjne a,#05h,for16
+mov a,#'5'
+acall display
+ret
+
+for16:
+cjne a,#06h,for17
+mov a,#'6'
+acall display
+ret
+
+for17:
+cjne a,#07h,for18
+mov a,#'7'
+acall display
+ret
+
+for18:
+cjne a,#08h,for19
+mov a,#'8'
+acall display
+ret
+
+for19:
+cjne a,#09h,for20
+mov a,#'9'
+acall display
+ret
+
+for20:
+cjne a,#00h,for21
+mov a,#'0'
+acall display
+ret
+
+for21:
+cjne a,#0ah,for22
+mov a,#'0'
+acall display
+for22:
+ret
+
+dialing:
+
+for1:
+cjne a,#01h,for2
+setb p1.1
+acall delay
+clr p1.1
+ret
+for2:
+cjne a,#02h,for3
+setb p1.2
+acall delay
+clr p1.2
+ret
+for3:
+cjne a,#03h,for4
+setb p1.3
+acall delay
+clr p1.3
+ret
+for4:
+cjne a,#04h,for5
+setb p1.4
+acall delay
+clr p1.4
+ret
+for5:
+cjne a,#05h,for6
+setb p1.5
+acall delay
+clr p1.5
+ret
+for6:
+cjne a,#06h,for7
+setb p1.6
+acall delay
+clr p1.6
+ret
+for7:
+cjne a,#07h,for8
+setb p1.7
+acall delay
+clr p1.7
+ret
+for8:
+cjne a,#08h,for9
+setb p3.0
+acall delay
+clr p3.0
+ret
+for9:
+cjne a,#09h,for10
+setb p3.1
+acall delay
+clr p3.1
+ret
+for10:
+cjne a,#00h,for111
+setb p3.2
+acall delay
+clr p3.2
+ret
+for111:
+cjne a,#0bh,main1
+setb p3.3
+acall delay
+clr p3.3
+ret
+
+main1:
+ljmp jstart
+
+command:
+       
+       acall   ready                   ;write whe display not ready
+       mov     lcd_dat,a               ;command character in p2
+       clr     rs                      ;command reg choosen
+       clr     rw                      ;write enabled
+       setb    en                      ;storbe char to display
+       clr     en                      
+       ret
+
+display:
+
+       acall   ready                          ;write when display ready
+       mov     lcd_dat,a               ;data char in p2
+       setb    rs                      ;data reg choosen
+       clr     rw                      ;write enabld
+       setb    en                      ;storbe char to display
+       clr     en
+       ret
+
+ready:
+
+       clr     en                      ;display enabled
+       mov     lcd_dat,#0ffh           ;configure p2 as input 
+       clr     rs                      ;select command reg
+       setb    rw                      ;read enabled 
+       
+wait:
+
+       clr     en                      ;storbe display
+       setb    en                      ;reda busy status status of display
+       jb      lcd_ack,wait            ;wait or not busy
+       clr     en                      ;end dispaly storbe
+       ret
+
+
+delay:
+
+mov R7,#08h                    
+up4:mov R6,#050h
+up3:mov R5,#00h                ; DELAY FOR 1SEC DELAY
+djnz R5,$
+djnz R6,up3 
+djnz R7,up4
+ret
+
+
+
+javastop:
+end
+
+
+

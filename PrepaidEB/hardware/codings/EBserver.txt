@@ -1,0 +1,221 @@
+org 0000h
+
+mov p0,#00h
+mov p1,#00h
+mov p2,#00h
+clr p3.2
+clr p3.3
+clr p3.4
+clr p3.5
+clr p3.6
+clr p3.7
+
+mov tmod,#20h
+mov th1,#-6h
+mov scon,#50h
+setb tr1
+
+       ;*****************EB SIDE ******************
+
+java:
+mov r0,#50h
+
+code:
+
+jnb p1.0,code
+jb p1.0,$
+mov a,p0
+cjne a,#0ch,main
+clr ti
+mov sbuf,#'X'
+
+h0:
+jnb ti,h0
+clr ti
+ajmp amount
+
+main:
+mov @r0,a
+inc r0
+cjne a,#0bh,code
+
+
+mov r0,#50h
+
+sc:
+mov a,@r0
+cjne a,#0bh,xx
+sjmp yy
+
+xx:
+
+add a,#30h
+mov sbuf,a
+
+h2:
+jnb ti,h2
+clr ti
+inc r0
+sjmp sc
+
+yy:
+clr ri
+
+
+amount:
+mov r0,#50h
+mov r1,#00h
+mov r2,#03h
+
+
+h3:
+jnb ri,h3
+clr ri
+mov a,sbuf
+mov @r0,a
+inc r0
+inc r1
+cjne a,#01000001B,h3
+
+h4:
+jnb ri,h4
+clr ri
+mov a,sbuf
+mov @r0,a
+inc r0
+inc r1
+djnz r2,h4
+
+sending:
+mov r0,#50h
+
+data:
+mov a,@r0
+acall dialing
+inc r0
+djnz r1,data
+ljmp java
+
+dialing:
+
+for1:
+cjne a,#01h,for2
+setb p1.1
+acall delay
+clr p1.1
+acall delay
+ret
+
+for2:
+cjne a,#02h,for3
+setb p1.2
+acall delay
+clr p1.2
+acall delay
+ret
+
+for3:
+cjne a,#03h,for4
+setb p1.3
+acall delay
+clr p1.3
+acall delay
+ret
+
+for4:
+cjne a,#04h,for5
+setb p1.4
+acall delay
+clr p1.4
+acall delay
+ret
+
+for5:
+cjne a,#05h,for6
+setb p1.5
+acall delay
+clr p1.5
+acall delay
+ret
+
+for6:
+cjne a,#06h,for7
+setb p1.6
+acall delay
+clr p1.6
+acall delay
+ret
+
+for7:
+cjne a,#07h,for8
+setb p1.7
+acall delay
+clr p1.7
+acall delay
+ret
+
+for8:
+cjne a,#08h,for9
+setb p3.2
+acall delay
+clr p3.2
+acall delay
+ret
+
+for9:
+cjne a,#09h,for0
+setb p3.3
+acall delay
+clr p3.3
+acall delay
+ret
+
+for0:
+cjne a,#00h,for14
+setb p3.4
+acall delay
+clr p3.4
+acall delay
+ret
+
+main1:
+ljmp main
+for14:
+cjne a,#01000001B,main1
+setb p3.5
+acall delay
+clr p3.5
+acall delay
+ret
+
+delay:
+   
+mov R7,#08h      
+up4:mov R6,#0a0h
+up3:mov R5,#00h  ; DELAY FOR 1SEC DELAY
+djnz R5,$
+djnz R6,up3 
+djnz R7,up4
+ret
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
